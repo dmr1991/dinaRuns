@@ -16,13 +16,13 @@ import { cn } from "@/app/lib/utils";
 import { WeekData, DayType, DayLog } from "@/app/lib/types";
 
 const WEEKLY_PLAN = [
-  { day: "Monday", workout: "Run", type: "run" as DayType },
+  { day: "Monday", workout: "Run + Routine A", type: "combined" as DayType },
   { day: "Tuesday", workout: "Run (Easy)", type: "run" as DayType },
   { day: "Wednesday", workout: "Rest", type: "rest" as DayType },
   { day: "Thursday", workout: "Run", type: "run" as DayType },
-  { day: "Friday", workout: "Routine A", type: "strength" as DayType },
+  { day: "Friday", workout: "Routine B", type: "strength" as DayType },
   { day: "Saturday", workout: "Rest", type: "rest" as DayType },
-  { day: "Sunday", workout: "Routine B", type: "strength" as DayType },
+  { day: "Sunday", workout: "Rest", type: "rest" as DayType },
 ];
 
 interface Props {
@@ -111,7 +111,7 @@ export default function WeeklyPlanner({ data, onChange }: Props) {
               </div>
 
               {!isRest && (
-                <div className="text-muted-foreground/20">
+                <div className="text-muted-foreground/80">
                   {expanded ? (
                     <ChevronUp size={18} />
                   ) : (
