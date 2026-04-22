@@ -7,29 +7,24 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "DinaRuns",
-  description: "Fitness tracker personalizado para Dina",
+  description: "Personal Training Tracker",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="h-full bg-[#050505] flex justify-center sm:items-center">
-
-        <div className="w-full max-w-[400px] h-full sm:h-[850px] bg-background sm:rounded-[3rem] sm:border-[8px] sm:border-[#1a1a1a] sm:shadow-2xl overflow-hidden relative flex flex-col">
+    <html lang="es" className="h-full antialiased">
+      <body
+        className={`${geistSans.variable} font-sans bg-[#050505] min-h-screen flex justify-center sm:items-center`}
+      >
+        {/* Este div simula el iPhone en desktop y es full screen en móvil */}
+        <div className="w-full max-w-[400px] h-screen sm:h-[852px] bg-background sm:rounded-[3rem] sm:border-[8px] sm:border-[#1a1a1a] shadow-2xl relative flex flex-col overflow-hidden">
+          {/* Contenedor de scroll interno */}
           <div className="flex-1 overflow-y-auto no-scrollbar">{children}</div>
         </div>
       </body>

@@ -1,27 +1,45 @@
 @import "tailwindcss";
 
 @theme {
-  /* Aquí definimos los colores de Lovable para que Tailwind los reconozca */
-  --color-background: oklch(12.67% 0 0); /* #0A0A0A aproximado */
-  --color-foreground: oklch(95% 0 0);
-  --color-card: oklch(18% 0 0);
-  --color-primary: oklch(65% 0.25 340); /* El rosa potente #ff2d75 */
-  --color-secondary: oklch(70% 0.15 180); /* Turquesa */
-  --color-muted: oklch(25% 0 0);
-  --color-muted-foreground: oklch(60% 0 0);
-  --color-accent: oklch(75% 0.2 150); /* Verde */
-  --color-destructive: oklch(60% 0.2 25); /* Rojo */
-  --color-border: oklch(25% 0 0);
-}
+  /* --- PALETA DINARUNS v2 (Mint Frost Update) --- */
+  
+  /* FONDO: Deep Dark Teal (Verde petróleo profundo) */
+  --color-background: oklch(18.2% 0.038 214.2); 
+  
+  /* TEXTOS: Blanco puro para máxima legibilidad */
+  --color-foreground: oklch(98% 0.01 214);
+  
+  /* CARDS: Un tono oscuro neutro */
+  --color-card: oklch(14% 0.02 214); 
 
-/* El CSS base que pide tu componente */
-:root {
-  --background: 0 0% 4%;
-  --foreground: 0 0% 95%;
+  /* PRIMARY: Tu rosa vibrante (E40159) */
+  --color-primary: oklch(57.3% 0.231 11.4); 
+
+  /* SECONDARY: El Morning Blue (89B0AE) */
+  --color-secondary: oklch(72.7% 0.032 195.4); 
+
+  /* ACCENT: El nuevo E2F3EF (Mint Frost) - Más claro y frío */
+  --color-accent: oklch(95.4% 0.015 174.5); 
+
+  /* BORDES: El Maroon (5A0A29) al 30% de opacidad para elegancia */
+  --color-border: oklch(24.3% 0.088 11.4 / 30%); 
+
+  /* SOPORTE */
+  --color-muted: oklch(25% 0.03 214);
+  --color-muted-foreground: oklch(65% 0.03 214);
+  --color-destructive: oklch(55% 0.2 25);
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-geist-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
