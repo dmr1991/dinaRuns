@@ -64,7 +64,7 @@ export default function ProgressBar({
                 {streak}
               </span>
               <span className="text-[10px] font-black uppercase text-primary leading-none">
-                w
+                d
               </span>
             </div>
           </div>
