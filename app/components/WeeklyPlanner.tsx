@@ -36,9 +36,9 @@ export default function WeeklyPlanner({ data, onChange }: Props) {
   const getDayLog = (i: number): DayLog =>
     data.days[i] || {
       completed: false,
-      energyLevel: 3,
-      footCondition: "Good",
-      kneeCondition: "Good",
+      energyLevel: 0, // Cambiado de 3 a 0
+      footCondition: "", // Cambiado de "Good" a vacío
+      kneeCondition: "", // Cambiado de "Good" a vacío
       notes: "",
     };
 

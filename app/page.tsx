@@ -72,9 +72,9 @@ export default function Page() {
     days.forEach((dayName, i) => {
       const log = weekData.days[i] || {
         completed: false,
-        energyLevel: 3,
-        footCondition: "Good",
-        kneeCondition: "Good",
+        energyLevel: 0, 
+        footCondition: "", 
+        kneeCondition: "", 
         notes: "",
       };
 
