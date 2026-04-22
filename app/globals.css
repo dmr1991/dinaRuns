@@ -1,22 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+@theme {
+  /* Aquí definimos los colores de Lovable para que Tailwind los reconozca */
+  --color-background: oklch(12.67% 0 0); /* #0A0A0A aproximado */
+  --color-foreground: oklch(95% 0 0);
+  --color-card: oklch(18% 0 0);
+  --color-primary: oklch(65% 0.25 340); /* El rosa potente #ff2d75 */
+  --color-secondary: oklch(70% 0.15 180); /* Turquesa */
+  --color-muted: oklch(25% 0 0);
+  --color-muted-foreground: oklch(60% 0 0);
+  --color-accent: oklch(75% 0.2 150); /* Verde */
+  --color-destructive: oklch(60% 0.2 25); /* Rojo */
+  --color-border: oklch(25% 0 0);
+}
+
+/* El CSS base que pide tu componente */
 :root {
   --background: 0 0% 4%;
   --foreground: 0 0% 95%;
-  --card: 0 0% 8%;
-  --card-foreground: 0 0% 95%;
-  --primary: 330 80% 55%;
-  --secondary: 174 62% 47%;
-  --accent: 145 60% 45%;
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 55%;
-  --border: 0 0% 16%;
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: 'Inter', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-geist-sans), sans-serif;
 }
