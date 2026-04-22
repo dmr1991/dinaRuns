@@ -47,21 +47,26 @@ export default function ProgressBar({
 
       {/* Streak Badge */}
       {streak > 0 && (
-        <div className="flex flex-col items-center justify-center bg-card border border-white/10 px-4 py-2 rounded-[1.2rem] shadow-xl relative overflow-hidden group">
-          {/* Brillo de fondo sutil */}
+        <div className="flex items-center gap-2 bg-card border border-white/10 pl-3 pr-4 py-2 rounded-2xl shadow-xl relative overflow-hidden group min-w-fit">
+          {/* Resplandor de fondo sutil */}
           <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors" />
 
-          <div className="relative flex flex-col items-center">
+          <div className="relative flex items-center gap-1.5">
+            {/* Fueguito alineado al centro del texto */}
             <Flame
               className="w-4 h-4 text-primary mb-0.5"
               fill="currentColor"
             />
-            <span className="text-sm font-black italic text-white leading-none">
-              {streak}
-              <span className="text-[10px] lowercase not-italic text-primary">
+
+            {/* Contenedor del texto con alineación de línea base corregida */}
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-base font-black italic text-white leading-none">
+                {streak}
+              </span>
+              <span className="text-[10px] font-black uppercase text-primary leading-none">
                 w
               </span>
-            </span>
+            </div>
           </div>
         </div>
       )}
