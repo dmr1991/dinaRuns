@@ -5,8 +5,20 @@ import ProgressBar from "@/app/components/ProgressBar";
 import WeeklyPlanner from "@/app/components/WeeklyPlanner";
 import RoutineTracker from "@/app/components/RoutineTracker";
 import { cn } from "@/app/lib/utils";
-import { WeekData } from "@/app/lib/types";
+import { WeekData, DayType } from "@/app/lib/types";
 import { Download } from "lucide-react";
+
+// --- FUENTE DE VERDAD ÚNICA ---
+// Modifica esto y se actualizará la App entera y el Reporte CSV
+const WEEKLY_PLAN = [
+  { day: "Monday", workout: "Run + Routine A", type: "run" as DayType },
+  { day: "Tuesday", workout: "Run (Easy)", type: "run" as DayType },
+  { day: "Wednesday", workout: "Rest", type: "rest" as DayType },
+  { day: "Thursday", workout: "Run", type: "run" as DayType },
+  { day: "Friday", workout: "Routine B", type: "strength" as DayType },
+  { day: "Saturday", workout: "Rest", type: "rest" as DayType },
+  { day: "Sunday", workout: "Rest", type: "rest" as DayType },
+];
 
 export default function Page() {
   const [tab, setTab] = useState("week");
@@ -15,29 +27,19 @@ export default function Page() {
     routines: {},
   });
 
-  // Cálculo de días completados
+  // Cálculo dinámico de días de entrenamiento (excluyendo "rest")
+  const totalWorkoutDays = WEEKLY_PLAN.filter((d) => d.type !== "rest").length;
+
   const completedDaysKeys = Object.keys(weekData.days).filter(
     (key) => weekData.days[parseInt(key)].completed,
   );
 
-  const totalWorkoutDays = 5;
-
-  /**
-   * Lógica de Daily Streak:
-   * Cuenta cuántos días seguidos llevas completados de hoy hacia atrás.
-   */
   const calculateDailyStreak = () => {
-    const dayIndexes = [0, 1, 2, 3, 4, 5, 6]; // Lun a Dom
     let streak = 0;
-
-    // Obtenemos el índice del día de hoy (0 = Lun, 6 = Dom)
-    // Para simplificar, buscamos la racha máxima actual en la semana
-    for (let i = 0; i < dayIndexes.length; i++) {
+    for (let i = 0; i < WEEKLY_PLAN.length; i++) {
       if (weekData.days[i]?.completed) {
         streak++;
       } else {
-        // Si el plan es "Rest" y no está marcado, podrías decidir si rompe racha o no.
-        // Aquí, cualquier día no marcado rompe la continuidad visual.
         if (streak > 0) break;
       }
     }
@@ -48,40 +50,22 @@ export default function Page() {
 
   const exportToCSV = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Dia,Estado,Entrenamiento,Energia,Pies,Rodillas,Notas\n";
+    csvContent += "Day,Status,Workout,Energy,Feet,Knees,Notes\n";
 
-    const days = [
-      "Lunes",
-      "Martes",
-      "Miercoles",
-      "Jueves",
-      "Viernes",
-      "Sabado",
-      "Domingo",
-    ];
-    const workouts = [
-      "Run",
-      "Run (Easy)",
-      "Rest",
-      "Run",
-      "Routine A",
-      "Rest",
-      "Routine B",
-    ];
-
-    days.forEach((dayName, i) => {
+    // Usamos el plan definido arriba para generar el CSV
+    WEEKLY_PLAN.forEach((planItem, i) => {
       const log = weekData.days[i] || {
         completed: false,
-        energyLevel: 0, 
-        footCondition: "", 
-        kneeCondition: "", 
+        energyLevel: 0,
+        footCondition: "",
+        kneeCondition: "",
         notes: "",
       };
 
       const line = [
-        dayName,
-        log.completed ? "HECHO" : "PENDIENTE",
-        workouts[i],
+        planItem.day,
+        log.completed ? "DONE" : "PENDING",
+        planItem.workout,
         log.energyLevel,
         log.footCondition,
         log.kneeCondition,
@@ -126,7 +110,6 @@ export default function Page() {
           />
         </header>
 
-        {/* Nav Principal */}
         <nav className="flex bg-muted/20 backdrop-blur-xl p-1 rounded-[2rem] mb-10 border border-white/5 sticky top-6 z-50 shadow-2xl">
           {[
             { id: "week", label: "WEEK" },
@@ -150,7 +133,12 @@ export default function Page() {
 
         <main className="animate-in fade-in slide-in-from-bottom-4 duration-700">
           {tab === "week" && (
-            <WeeklyPlanner data={weekData} onChange={setWeekData} />
+            // Pasamos WEEKLY_PLAN como prop para que el Planner sepa qué mostrar
+            <WeeklyPlanner
+              plan={WEEKLY_PLAN}
+              data={weekData}
+              onChange={setWeekData}
+            />
           )}
           {(tab === "A" || tab === "B") && (
             <RoutineTracker

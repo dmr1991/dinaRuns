@@ -3,9 +3,7 @@
 import { useState } from "react";
 import {
   Check,
-  Flame,
   Moon,
-  Dumbbell,
   ChevronDown,
   ChevronUp,
   Footprints,
@@ -13,32 +11,23 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/app/lib/utils";
-import { WeekData, DayType, DayLog } from "@/app/lib/types";
-
-const WEEKLY_PLAN = [
-  { day: "Monday", workout: "Run + Routine A", type: "combined" as DayType },
-  { day: "Tuesday", workout: "Run (Easy)", type: "run" as DayType },
-  { day: "Wednesday", workout: "Rest", type: "rest" as DayType },
-  { day: "Thursday", workout: "Run", type: "run" as DayType },
-  { day: "Friday", workout: "Routine B", type: "strength" as DayType },
-  { day: "Saturday", workout: "Rest", type: "rest" as DayType },
-  { day: "Sunday", workout: "Rest", type: "rest" as DayType },
-];
+import { WeekData, DayLog } from "@/app/lib/types";
 
 interface Props {
+  plan: any[]; // Recibe el plan desde page.tsx
   data: WeekData;
   onChange: (data: WeekData) => void;
 }
 
-export default function WeeklyPlanner({ data, onChange }: Props) {
+export default function WeeklyPlanner({ plan, data, onChange }: Props) {
   const [expandedDay, setExpandedDay] = useState<number | null>(null);
 
   const getDayLog = (i: number): DayLog =>
     data.days[i] || {
       completed: false,
-      energyLevel: 0, // Cambiado de 3 a 0
-      footCondition: "", // Cambiado de "Good" a vacío
-      kneeCondition: "", // Cambiado de "Good" a vacío
+      energyLevel: 0,
+      footCondition: "",
+      kneeCondition: "",
       notes: "",
     };
 
@@ -52,7 +41,7 @@ export default function WeeklyPlanner({ data, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      {WEEKLY_PLAN.map((day, i) => {
+      {plan.map((day, i) => {
         const log = getDayLog(i);
         const isRest = day.type === "rest";
         const expanded = expandedDay === i;
