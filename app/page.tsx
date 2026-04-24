@@ -6,7 +6,7 @@ import WeeklyPlanner from "@/app/components/WeeklyPlanner";
 import RoutineTracker from "@/app/components/RoutineTracker";
 import { cn } from "@/app/lib/utils";
 import { WeekData, DayType } from "@/app/lib/types";
-import { Download } from "lucide-react";
+import { Download, CalendarDays } from "lucide-react";
 
 const WEEKLY_PLAN = [
   { day: "Monday", workout: "Run + Routine A", type: "run" as DayType },
@@ -33,16 +33,14 @@ export default function Page() {
     routines: {},
   });
 
-  // 1. Identificamos la semana actual
   const currentWeekId = getMondayId(new Date());
 
-  // 2. Cargamos enviando el weekId a la API
+  // Cargar datos de la semana actual
   useEffect(() => {
     const loadData = async () => {
       try {
         const res = await fetch(`/api/training?weekId=${currentWeekId}`);
         const data = await res.json();
-        // Si hay data (aunque sea objeto vacío de routines), la ponemos.
         if (data) {
           setWeekData(data);
         }
@@ -53,16 +51,15 @@ export default function Page() {
     loadData();
   }, [currentWeekId]);
 
-  // 3. Guardamos enviando el weekId y los datos en el body
   const handleDataChange = async (newData: WeekData) => {
     setWeekData(newData);
     try {
       await fetch("/api/training", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          weekId: currentWeekId,
-          weekData: newData,
+        body: JSON.stringify({ 
+          weekId: currentWeekId, 
+          weekData: newData 
         }),
       });
     } catch (error) {
@@ -70,52 +67,80 @@ export default function Page() {
     }
   };
 
-  const totalWorkoutDays = WEEKLY_PLAN.filter((d) => d.type !== "rest").length;
-  const completedCount = Object.values(weekData.days).filter(
-    (d) => d.completed,
-  ).length;
-  const progressIntensity =
-    totalWorkoutDays > 0 ? completedCount / totalWorkoutDays : 0;
-  const completedDaysKeys = Object.keys(weekData.days).filter(
-    (key) => weekData.days[parseInt(key)].completed,
-  );
+  // --- LÓGICA DE EXPORTACIÓN ---
 
-  const exportToCSV = () => {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent +=
-      "Day,Status,Workout,Distance,Shoes,Energy,Feet,Shins,Hips,Knees,AvgHR,HRStatus,Notes\n";
-
-    WEEKLY_PLAN.forEach((planItem, i) => {
-      const log = weekData.days[i] || {};
-      const line = [
-        planItem.day,
-        log.completed ? "DONE" : "PENDING",
-        planItem.workout,
-        log.distance || "0",
-        log.shoes || "N/A",
-        log.energyLevel || 0,
-        log.footCondition || "",
-        log.shinCondition || "",
-        log.hipCondition || "",
-        log.kneeCondition || "",
-        log.avgHR || "",
-        log.hrStatus || "",
-        `"${(log.notes || "").replace(/"/g, '""')}"`,
-      ].join(",");
-      csvContent += line + "\n";
+  const generateCSVString = (weeksArray: any[]) => {
+    let csv = "WeekID,Day,Status,Workout,Distance,AvgPace,Shoes,Energy,Feet,Shins,Hips,Knees,AvgHR,HRStatus,Notes\n";
+    
+    // Ordenar semanas por fecha antes de generar
+    weeksArray.sort((a, b) => a.weekId.localeCompare(b.weekId)).forEach((weekDoc) => {
+      WEEKLY_PLAN.forEach((planItem, i) => {
+        const log = (weekDoc.weekData?.days || weekDoc.days)?.[i] || {};
+        const line = [
+          weekDoc.weekId || currentWeekId,
+          planItem.day,
+          log.completed ? "DONE" : "PENDING",
+          planItem.workout,
+          log.distance || "0",
+          log.avgPace || "0:00",
+          log.shoes || "N/A",
+          log.energyLevel || 0,
+          log.footCondition || "",
+          log.shinCondition || "",
+          log.hipCondition || "",
+          log.kneeCondition || "",
+          log.avgHR || "",
+          log.hrStatus || "",
+          `"${(log.notes || "").replace(/"/g, '""')}"`,
+        ].join(",");
+        csv += line + "\n";
+      });
     });
+    return csv;
+  };
 
-    const encodedUri = encodeURI(csvContent);
+  const downloadFile = (content: string, fileName: string) => {
+    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + content);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `DinaRuns_Log_${currentWeekId}.csv`, // Nombre más útil
-    );
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  // Descargar solo la semana que estoy viendo
+  const exportCurrentWeek = () => {
+    const csv = generateCSVString([{ weekId: currentWeekId, weekData: weekData }]);
+    downloadFile(csv, `DinaRuns_Week_${currentWeekId}.csv`);
+  };
+
+  // Descargar todo el mes actual
+  const exportMonthlyCSV = async () => {
+    const currentMonth = currentWeekId.substring(0, 7); // "2026-04"
+    try {
+      const res = await fetch(`/api/training?month=${currentMonth}`);
+      const allWeeks = await res.json();
+
+      if (!allWeeks || allWeeks.length === 0) {
+        alert("No hay datos guardados para este mes aún.");
+        return;
+      }
+
+      const csv = generateCSVString(allWeeks);
+      downloadFile(csv, `DinaRuns_Monthly_${currentMonth}.csv`);
+    } catch (error) {
+      console.error("Error en descarga mensual:", error);
+    }
+  };
+
+  // --- CÁLCULOS DE PROGRESO ---
+  const totalWorkoutDays = WEEKLY_PLAN.filter((d) => d.type !== "rest").length;
+  const completedCount = Object.values(weekData.days).filter((d) => d.completed).length;
+  const progressIntensity = totalWorkoutDays > 0 ? completedCount / totalWorkoutDays : 0;
+  const completedDaysKeys = Object.keys(weekData.days).filter(
+    (key) => weekData.days[parseInt(key)].completed
+  );
 
   return (
     <div className="min-h-screen bg-background text-white font-sans">
@@ -127,23 +152,40 @@ export default function Page() {
                 <h1 className="text-2xl font-black italic tracking-tighter uppercase">
                   DINA<span className="text-primary">RUNS</span>
                 </h1>
-                <span className="text-[10px] font-bold text-muted-foreground/50 tracking-[0.2em] uppercase">
+                <span className="text-[10px] font-bold text-muted-foreground/40 tracking-[0.2em] uppercase">
                   Week: {currentWeekId}
                 </span>
               </div>
-              <button
-                onClick={exportToCSV}
-                className="p-3 bg-white/5 border border-white/10 rounded-2xl text-muted-foreground hover:text-primary transition-colors active:scale-95"
-              >
-                <Download size={18} />
-              </button>
+              
+              <div className="flex gap-2">
+                {/* Botón Mensual */}
+                <button
+                  onClick={exportMonthlyCSV}
+                  title="Download Month"
+                  className="flex items-center gap-2 px-4 py-3 bg-primary/10 border border-primary/20 rounded-2xl text-primary text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all active:scale-95"
+                >
+                  <CalendarDays size={16} />
+                  <span>Month</span>
+                </button>
+                
+                {/* Botón Semanal */}
+                <button
+                  onClick={exportCurrentWeek}
+                  title="Download Week"
+                  className="p-3 bg-white/5 border border-white/10 rounded-2xl text-muted-foreground hover:text-primary transition-colors active:scale-95"
+                >
+                  <Download size={18} />
+                </button>
+              </div>
             </div>
+
             <ProgressBar
               completedDays={completedDaysKeys}
               totalWorkoutDays={totalWorkoutDays}
               intensity={progressIntensity}
             />
           </header>
+
           <nav className="flex bg-muted/20 backdrop-blur-xl p-1 rounded-[2rem] border border-white/5 shadow-2xl">
             {[
               { id: "week", label: "WEEK" },
@@ -157,7 +199,7 @@ export default function Page() {
                   "flex-1 py-4 rounded-[1.8rem] text-[10px] font-black uppercase tracking-widest transition-all duration-500",
                   tab === t.id
                     ? "bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]"
-                    : "text-muted-foreground hover:text-white",
+                    : "text-muted-foreground hover:text-white"
                 )}
               >
                 {t.label}
@@ -165,6 +207,7 @@ export default function Page() {
             ))}
           </nav>
         </div>
+
         <main className="animate-in fade-in slide-in-from-bottom-4 duration-700 mt-8">
           {tab === "week" && (
             <WeeklyPlanner
