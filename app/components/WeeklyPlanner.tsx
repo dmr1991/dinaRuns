@@ -270,22 +270,22 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                         {
                           label: "Feet",
                           key: "footCondition",
-                          options: ["Good", "Tired", "Pain"],
+                          options: ["Good", "Tired", "Discomfort", "Pain"],
                         },
                         {
                           label: "Shins",
                           key: "shinCondition",
-                          options: ["Good", "Tight", "Pain"],
+                          options: ["Good", "Tight", "Discomfort", "Pain"],
                         },
                         {
                           label: "Hips",
                           key: "hipCondition",
-                          options: ["Good", "Tight", "Pain"],
+                          options: ["Good", "Tight", "Discomfort", "Pain"],
                         },
                         {
                           label: "Knees",
                           key: "kneeCondition",
-                          options: ["Good", "Weak", "Pain"],
+                          options: ["Good", "Weak", "Discomfort", "Pain"],
                         },
                       ].map((group) => (
                         <div key={group.key} className="space-y-3">
