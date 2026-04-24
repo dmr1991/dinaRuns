@@ -6,15 +6,16 @@ export type DayType = "run" | "rest" | "strength" | "combined";
 export interface DayLog {
   completed: boolean;
   energyLevel: number;
-  avgHR: string;
-  hrStatus: string;
-  notes: string;
   distance: string;
+  avgPace?: string;
   shoes: string;
   footCondition: string;
   kneeCondition: string;
   shinCondition: string;
   hipCondition: string;
+  avgHR: string;
+  hrStatus: string;
+  notes: string;
 }
 /**
  * Estado de cada ronda dentro de una rutina de fuerza.

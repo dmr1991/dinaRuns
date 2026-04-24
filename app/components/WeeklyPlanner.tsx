@@ -11,6 +11,7 @@ import {
   Lock,
   Unlock,
   Zap,
+  Timer,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/app/lib/utils";
@@ -33,6 +34,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
       completed: false,
       energyLevel: 0,
       distance: "",
+      avgPace: "",
       shoes: "",
       footCondition: "",
       kneeCondition: "",
@@ -49,6 +51,12 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
       ...data,
       days: { ...data.days, [i]: { ...current, ...patch } },
     });
+  };
+
+  // Limpiador de KM para asegurar formato decimal con punto
+  const handleDistanceChange = (i: number, value: string) => {
+    const sanitized = value.replace(",", ".");
+    updateDay(i, { distance: sanitized });
   };
 
   const handleLockIn = (i: number) => {
@@ -81,6 +89,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
               saving && "ring-2 ring-primary border-primary",
             )}
           >
+            {/* Header del Día */}
             <button
               onClick={() => !isRest && setExpandedDay(expanded ? null : i)}
               className={cn(
@@ -123,11 +132,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
               </div>
               {!isRest && (
                 <div className="text-muted-foreground/80">
-                  {expanded ? (
-                    <ChevronUp size={18} />
-                  ) : (
-                    <ChevronDown size={18} />
-                  )}
+                  {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </div>
               )}
             </button>
@@ -147,7 +152,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                         : "opacity-100",
                     )}
                   >
-                    {/* KM & SHOES SECTION */}
+                    {/* SECCIÓN 1: DISTANCIA Y ZAPATOS */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-3">
                         <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 ml-1">
@@ -155,15 +160,13 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                         </label>
                         <div className="relative">
                           <input
-                            type="number"
+                            type="text"
                             inputMode="decimal"
                             disabled={isLocked}
                             value={log.distance}
-                            onChange={(e) =>
-                              updateDay(i, { distance: e.target.value })
-                            }
+                            onChange={(e) => handleDistanceChange(i, e.target.value)}
                             placeholder="0.0"
-                            className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-4 py-2 text-xl font-black italic text-primary placeholder:text-white/10 outline-none focus:border-primary/40 focus:bg-primary/5 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-4 py-2 text-xl font-black italic text-primary placeholder:text-white/10 outline-none focus:border-primary/40 focus:bg-primary/5 transition-all"
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/20 uppercase">
                             KM
@@ -194,53 +197,68 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                       </div>
                     </div>
 
-                    {/* HR Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 ml-1">
-                        <Heart
-                          size={12}
-                          className="text-primary animate-pulse"
-                        />
-                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60">
-                          Average Heart Rate
+                    {/* SECCIÓN 2: PACE Y HEART RATE */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 ml-1">
+                          <Timer size={12} /> Avg Pace
                         </label>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          disabled={isLocked}
-                          value={log.avgHR}
-                          onChange={(e) =>
-                            updateDay(i, { avgHR: e.target.value })
-                          }
-                          placeholder="000"
-                          className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-4 py-2 text-xl font-black italic text-primary placeholder:text-white/10 outline-none focus:border-primary/40 focus:bg-primary/5 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/20 uppercase pointer-events-none">
-                          BPM
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        {["Stable", "Varied", "High"].map((status) => (
-                          <button
-                            key={status}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            inputMode="text"
                             disabled={isLocked}
-                            onClick={() => updateDay(i, { hrStatus: status })}
-                            className={cn(
-                              "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
-                              log.hrStatus === status
-                                ? "bg-primary text-white shadow-md shadow-primary/20"
-                                : "bg-white/5 text-muted-foreground border border-white/5",
-                            )}
-                          >
-                            {status}
-                          </button>
-                        ))}
+                            value={log.avgPace || ""}
+                            onChange={(e) => updateDay(i, { avgPace: e.target.value })}
+                            placeholder="0:00"
+                            className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-4 py-2 text-xl font-black italic text-primary placeholder:text-white/10 outline-none focus:border-primary/40 focus:bg-primary/5 transition-all"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/20 uppercase">
+                            /KM
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 ml-1">
+                          <Heart size={12} className="animate-pulse" /> Avg HR
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            inputMode="numeric"
+                            disabled={isLocked}
+                            value={log.avgHR}
+                            onChange={(e) => updateDay(i, { avgHR: e.target.value })}
+                            placeholder="000"
+                            className="w-full bg-white/5 border-2 border-white/10 rounded-2xl px-4 py-2 text-xl font-black italic text-primary placeholder:text-white/10 outline-none focus:border-primary/40 focus:bg-primary/5 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-white/20 uppercase">
+                            BPM
+                          </span>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Energy Level */}
+                    {/* HR Status (debajo de las métricas) */}
+                    <div className="flex gap-2">
+                      {["Stable", "Varied", "High"].map((status) => (
+                        <button
+                          key={status}
+                          disabled={isLocked}
+                          onClick={() => updateDay(i, { hrStatus: status })}
+                          className={cn(
+                            "flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
+                            log.hrStatus === status
+                              ? "bg-primary text-white shadow-md shadow-primary/20"
+                              : "bg-white/5 text-muted-foreground border border-white/5",
+                          )}
+                        >
+                          {status}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* SECCIÓN 3: ENERGY LEVEL */}
                     <div className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 ml-1">
                         <Activity size={12} /> Energy Level
@@ -264,29 +282,13 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                       </div>
                     </div>
 
-                    {/* Body Conditions Grid */}
+                    {/* SECCIÓN 4: BODY CONDITIONS */}
                     <div className="grid grid-cols-2 gap-4">
                       {[
-                        {
-                          label: "Feet",
-                          key: "footCondition",
-                          options: ["Good", "Tired", "Discomfort", "Pain"],
-                        },
-                        {
-                          label: "Shins",
-                          key: "shinCondition",
-                          options: ["Good", "Tight", "Discomfort", "Pain"],
-                        },
-                        {
-                          label: "Hips",
-                          key: "hipCondition",
-                          options: ["Good", "Tight", "Discomfort", "Pain"],
-                        },
-                        {
-                          label: "Knees",
-                          key: "kneeCondition",
-                          options: ["Good", "Weak", "Discomfort", "Pain"],
-                        },
+                        { label: "Feet", key: "footCondition", options: ["Good", "Tired", "Discomfort", "Pain"] },
+                        { label: "Shins", key: "shinCondition", options: ["Good", "Tight", "Discomfort", "Pain"] },
+                        { label: "Hips", key: "hipCondition", options: ["Good", "Tight", "Discomfort", "Pain"] },
+                        { label: "Knees", key: "kneeCondition", options: ["Good", "Weak", "Discomfort", "Pain"] },
                       ].map((group) => (
                         <div key={group.key} className="space-y-3">
                           <label className="text-[10px] font-black uppercase tracking-widest text-primary/60 flex items-center gap-2 ml-1">
@@ -297,9 +299,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                               <button
                                 key={opt}
                                 disabled={isLocked}
-                                onClick={() =>
-                                  updateDay(i, { [group.key]: opt } as any)
-                                }
+                                onClick={() => updateDay(i, { [group.key]: opt } as any)}
                                 className={cn(
                                   "py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all",
                                   (log as any)[group.key] === opt
@@ -328,9 +328,7 @@ export default function WeeklyPlanner({ plan, data, onChange }: Props) {
                   <div className="px-6 pb-6">
                     <button
                       onClick={() =>
-                        isLocked
-                          ? updateDay(i, { completed: false })
-                          : handleLockIn(i)
+                        isLocked ? updateDay(i, { completed: false }) : handleLockIn(i)
                       }
                       className={cn(
                         "w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300",
